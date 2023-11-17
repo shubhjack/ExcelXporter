@@ -7,6 +7,14 @@
 		<GeneratePackageOnBuild>False</GeneratePackageOnBuild>
 		<Title>ExcelXporter</Title>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<PackageProjectUrl></PackageProjectUrl>
+		<Description>A library to export data in any model list to excel file</Description>
+		<RepositoryUrl>https://github.com/shubhjack/ExcelXporter</RepositoryUrl>
+		<RepositoryType>github</RepositoryType>
+		<PackageTags>export;excel;excel export</PackageTags>
+		<PackageReleaseNotes>first release</PackageReleaseNotes>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<PackageIcon>icons8-export-excel-96.png</PackageIcon>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -25,6 +33,20 @@
 			<Pack>true</Pack>
 			<PackagePath>\</PackagePath>
 		</Content>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Include="..\..\..\Downloads\icons8-export-excel-96.png">
+	    <Pack>True</Pack>
+	    <PackagePath>\</PackagePath>
+	  </None>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Update="README.md">
+	    <Pack>True</Pack>
+	    <PackagePath>\</PackagePath>
+	  </None>
 	</ItemGroup>
 
 </Project>
