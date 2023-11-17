@@ -1,0 +1,15 @@
+﻿<?xml version="1.0"?>
+<package>
+	<metadata>
+		<id>ExcelXporter</id>
+		<version>1.0.0.</version>
+		<authors>Shubham Kumar</authors>
+		<owners>Shubham Kumar</owners>
+		<description>A library for exporting data model list to Excel</description>
+		<tags>export data model list to excel</tags>
+	</metadata>
+	<files>
+		<file src="bin\Release\net6.0\ExcelXporter.dll" target="lib\net6.0" />
+		<file src="..\README.md" target="\" />
+	</files>
+</package>
