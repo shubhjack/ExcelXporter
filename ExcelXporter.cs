@@ -15,7 +15,7 @@ namespace ExcelXporter
         /// <param name="objList"></param>
         /// <param name="filename"></param>
         /// <returns>.xlsx file</returns>
-        public static FileContentResult ExportToExcel<T>(List<T> objList, string filename)
+        public static FileContentResult ExportToExcel<T>(this List<T> objList, string filename)
         {
             Stream stream = new MemoryStream();
             using (var spreadsheetDocument = SpreadsheetDocument.Create(stream, SpreadsheetDocumentType.Workbook))
@@ -53,9 +53,18 @@ namespace ExcelXporter
                     var dataRow = new Row();
                     foreach (var value in values)
                     {
-                        dataRow.Append(
-                            new Cell() { CellValue = new CellValue(value), DataType = CellValues.String }
-                        );
+                        if (int.TryParse(value, out int result))
+                        {
+                            dataRow.Append(
+                                new Cell() { CellValue = new CellValue(result), DataType = CellValues.Number }
+                            );
+                        }
+                        else
+                        {
+                            dataRow.Append(
+                                new Cell() { CellValue = new CellValue(value), DataType = CellValues.String }
+                            );
+                        }                        
                     }
                     worksheetPart.Worksheet.GetFirstChild<SheetData>().AppendChild(dataRow);
                 }
