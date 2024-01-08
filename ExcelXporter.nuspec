@@ -2,7 +2,7 @@
 <package>
 	<metadata>
 		<id>ExcelXporter</id>
-		<version>1.0.0.</version>
+		<version>1.0.3</version>
 		<authors>Shubham Kumar</authors>
 		<owners>Shubham Kumar</owners>
 		<description>A library for exporting data model list to Excel</description>
