@@ -2,6 +2,7 @@
 using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
+using ExcelXporter.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ExcelXporter
@@ -15,7 +16,7 @@ namespace ExcelXporter
         /// <param name="objList"></param>
         /// <param name="filename"></param>
         /// <returns>.xlsx file</returns>
-        public static FileContentResult ExportToExcel<T>(this List<T> objList, string filename)
+        public static FileContentResult ExportToExcel<T>(this List<T> objList, string filename, StyleOptions? styleOptions = null)
         {
             Stream stream = new MemoryStream();
             using (var spreadsheetDocument = SpreadsheetDocument.Create(stream, SpreadsheetDocumentType.Workbook))
@@ -23,8 +24,14 @@ namespace ExcelXporter
                 var workbookPart = spreadsheetDocument.AddWorkbookPart();
                 workbookPart.Workbook = new Workbook();
 
+                styleOptions ??= new StyleOptions();
+                var styleSheet = CreateStylesheet(styleOptions);
+                var stylesPart = workbookPart.AddNewPart<WorkbookStylesPart>();
+                stylesPart.Stylesheet = styleSheet;
+                stylesPart.Stylesheet.Save();
+
                 var worksheetPart = workbookPart.AddNewPart<WorksheetPart>();
-                worksheetPart.Worksheet = new Worksheet(new SheetData());
+                worksheetPart.Worksheet = new Worksheet(new SheetData());                
 
                 var sheets = spreadsheetDocument.WorkbookPart.Workbook.AppendChild(new Sheets());
 
@@ -42,7 +49,11 @@ namespace ExcelXporter
                 foreach (var name in columnNames)
                 {
                     headerRow.Append(
-                        new Cell() { CellValue = new CellValue(name), DataType = CellValues.String }
+                        new Cell() { 
+                            CellValue = new CellValue(name), 
+                            DataType = CellValues.String,
+                            StyleIndex = 1
+                        }
                     );
                 }
 
@@ -56,13 +67,21 @@ namespace ExcelXporter
                         if (int.TryParse(value, out int result))
                         {
                             dataRow.Append(
-                                new Cell() { CellValue = new CellValue(result), DataType = CellValues.Number }
+                                new Cell() { 
+                                    CellValue = new CellValue(result), 
+                                    DataType = CellValues.Number,
+                                    StyleIndex = 2
+                                }
                             );
                         }
                         else
                         {
                             dataRow.Append(
-                                new Cell() { CellValue = new CellValue(value), DataType = CellValues.String }
+                                new Cell() { 
+                                    CellValue = new CellValue(value), 
+                                    DataType = CellValues.String,
+                                    StyleIndex = 2
+                                }
                             );
                         }                        
                     }
@@ -85,13 +104,20 @@ namespace ExcelXporter
             };
         }
 
-        public static FileContentResult ExportToExcelMultipleSheets(this List<dynamic> sheetData, string filename)
+        public static FileContentResult ExportToExcelMultipleSheets(this List<dynamic> sheetData, string filename, StyleOptions? styleOptions = null)
         {
             Stream stream = new MemoryStream();
             using (var spreadsheetDocument = SpreadsheetDocument.Create(stream, SpreadsheetDocumentType.Workbook))
             {
                 var workbookPart = spreadsheetDocument.AddWorkbookPart();
                 workbookPart.Workbook = new Workbook();
+
+                styleOptions ??= new StyleOptions();
+                var styleSheet = CreateStylesheet(styleOptions);
+                var stylesPart = workbookPart.AddNewPart<WorkbookStylesPart>();
+                stylesPart.Stylesheet = styleSheet;
+                stylesPart.Stylesheet.Save();
+
                 var sheets = spreadsheetDocument.WorkbookPart.Workbook.AppendChild(new Sheets());
 
                 int sheetId = 0;
@@ -116,8 +142,13 @@ namespace ExcelXporter
                     foreach (var name in columnNames)
                     {
                         headerRow.Append(
-                            new Cell() { CellValue = new CellValue(name), DataType = CellValues.String }
-                        );
+                        new Cell()
+                        {
+                            CellValue = new CellValue(name),
+                            DataType = CellValues.String,
+                            StyleIndex = 1
+                        }
+                    );
                     }
 
                     worksheetPart.Worksheet.GetFirstChild<SheetData>().AppendChild(headerRow);
@@ -131,13 +162,23 @@ namespace ExcelXporter
                             if (int.TryParse(value, out int result))
                             {
                                 dataRow.Append(
-                                    new Cell() { CellValue = new CellValue(result.ToString()), DataType = CellValues.Number }
+                                    new Cell()
+                                    {
+                                        CellValue = new CellValue(result),
+                                        DataType = CellValues.Number,
+                                        StyleIndex = 2
+                                    }
                                 );
                             }
                             else
                             {
                                 dataRow.Append(
-                                    new Cell() { CellValue = new CellValue(value), DataType = CellValues.String }
+                                    new Cell()
+                                    {
+                                        CellValue = new CellValue(value),
+                                        DataType = CellValues.String,
+                                        StyleIndex = 2
+                                    }
                                 );
                             }
                         }
@@ -161,6 +202,76 @@ namespace ExcelXporter
                 FileDownloadName = $"{fileDownloadName}.xlsx"
             };
         }
+
+        private static Stylesheet CreateStylesheet(StyleOptions styleOptions)
+        {
+            var fonts = new Fonts(
+                new Font(), // 0 - default
+                new Font(   // 1 - header font
+                    new Bold(),
+                    new Color { Rgb = styleOptions.HeaderStyle.FontColorHex }),
+                new Font(   // 2 - data font
+                    new Color { Rgb = styleOptions.DefaultCellStyle.FontColorHex })
+            );
+
+            var fills = new Fills(
+                new Fill(new PatternFill { PatternType = PatternValues.None }), // 0
+                new Fill(new PatternFill { PatternType = PatternValues.Gray125 }), // 1
+                new Fill(new PatternFill(new ForegroundColor { Rgb = styleOptions.HeaderStyle.BackgroundColorHex })
+                {
+                    PatternType = PatternValues.Solid
+                }) // 2 - header fill
+            );
+
+            var borders = new Borders(new Border()); // default border
+            uint borderId = 0;
+
+            if (styleOptions.BorderStyle.ApplyBorders)
+            {
+                var border = new Border(
+                    new LeftBorder { Style = styleOptions.BorderStyle.Style, Color = new Color { Rgb = styleOptions.BorderStyle.BorderColorHex } },
+                    new RightBorder { Style = styleOptions.BorderStyle.Style, Color = new Color { Rgb = styleOptions.BorderStyle.BorderColorHex } },
+                    new TopBorder { Style = styleOptions.BorderStyle.Style, Color = new Color { Rgb = styleOptions.BorderStyle.BorderColorHex } },
+                    new BottomBorder { Style = styleOptions.BorderStyle.Style, Color = new Color { Rgb = styleOptions.BorderStyle.BorderColorHex } },
+                    new DiagonalBorder()
+                );
+                borders.Append(border);
+                borderId = 1;
+            }
+
+            var align = styleOptions.DefaultCellStyle.HorizontalAlignment switch
+            {
+                TextAlignment.Center => HorizontalAlignmentValues.Center,
+                TextAlignment.Right => HorizontalAlignmentValues.Right,
+                _ => HorizontalAlignmentValues.Left
+            };
+
+            var cellFormats = new CellFormats(
+                new CellFormat(), // 0 - default
+                new CellFormat // 1 - header
+                {
+                    FontId = 1,
+                    FillId = 2,
+                    BorderId = borderId,
+                    ApplyFont = true,
+                    ApplyFill = true,
+                    ApplyBorder = styleOptions.BorderStyle.ApplyBorders
+                },
+                new CellFormat // 2 - data
+                {
+                    FontId = 2,
+                    FillId = 0,
+                    BorderId = borderId,
+                    ApplyFont = true,
+                    ApplyBorder = styleOptions.BorderStyle.ApplyBorders,
+                    Alignment = new Alignment { Horizontal = align }
+                }
+            );
+
+            return new Stylesheet(fonts, fills, borders, cellFormats);
+        }
+
+
 
     }
 }
