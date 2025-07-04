@@ -16,13 +16,13 @@ namespace ExcelXporter.Models
 
     public class HeaderStyle
     {
-        public string BackgroundColorHex { get; set; } = "#4472C4"; // blue
-        public string FontColorHex { get; set; } = "#FFFFFF"; // white
+        public string BackgroundColorHex { get; set; } = string.Empty;
+        public string FontColorHex { get; set; } = "000000"; 
     }
 
     public class ExcelCellStyle
     {
-        public string FontColorHex { get; set; } = "#000000"; // black
+        public string FontColorHex { get; set; } = "000000"; // black
         public TextAlignment HorizontalAlignment { get; set; } = TextAlignment.Left; // or Center, Right
     }
 

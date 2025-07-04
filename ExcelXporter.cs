@@ -214,13 +214,24 @@ namespace ExcelXporter
                     new Color { Rgb = styleOptions.DefaultCellStyle.FontColorHex })
             );
 
+            Fill headerFill;
+
+            if (!string.IsNullOrWhiteSpace(styleOptions.HeaderStyle.BackgroundColorHex))
+            {
+                headerFill = new Fill(new PatternFill(new ForegroundColor { Rgb = styleOptions.HeaderStyle.BackgroundColorHex })
+                {
+                        PatternType = PatternValues.Solid
+                });
+            }
+            else
+            {
+                headerFill = new Fill(new PatternFill { PatternType = PatternValues.None });
+            }
+
             var fills = new Fills(
                 new Fill(new PatternFill { PatternType = PatternValues.None }), // 0
                 new Fill(new PatternFill { PatternType = PatternValues.Gray125 }), // 1
-                new Fill(new PatternFill(new ForegroundColor { Rgb = styleOptions.HeaderStyle.BackgroundColorHex })
-                {
-                    PatternType = PatternValues.Solid
-                }) // 2 - header fill
+                headerFill
             );
 
             var borders = new Borders(new Border()); // default border
@@ -270,8 +281,5 @@ namespace ExcelXporter
 
             return new Stylesheet(fonts, fills, borders, cellFormats);
         }
-
-
-
     }
 }
