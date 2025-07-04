@@ -6,7 +6,7 @@
 		<Nullable>enable</Nullable>
 		<GeneratePackageOnBuild>False</GeneratePackageOnBuild>
 		<Title>ExcelXporter</Title>
-		<Version>1.0.3</Version>
+		<Version>1.0.4</Version>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 		<PackageProjectUrl></PackageProjectUrl>
 		<Description>A library to export data in any model list to excel file</Description>
@@ -21,7 +21,7 @@
 			* updated readme.
 		</PackageReleaseNotes>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
-		<PackageIcon>icons8-export-excel-96.png</PackageIcon>
+		<PackageIcon>logo.png</PackageIcon>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -43,7 +43,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <None Include="..\..\..\Downloads\icons8-export-excel-96.png">
+	  <None Include="..\..\..\Downloads\logo.png">
 	    <Pack>True</Pack>
 	    <PackagePath>\</PackagePath>
 	  </None>
